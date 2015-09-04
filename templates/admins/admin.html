@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    {% load staticfiles %}
+    {% include 'html_head.html' %}
+    <link href="{% static 'bug_vote/css/dashboard.css' %}" rel="stylesheet">
+
+    <title>后台管理</title>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand">后台管理</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+
+            <ul class="nav navbar-nav navbar-right">
+                <li><a style="color: #337ab7;"><strong>{{ username }}</strong></a></li>
+                <li><a href="javascript:logout_ajax()">注销</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li><a href="javascript:load_users_view()">用户名单</a></li>
+                <li><a href="javascript:load_records_view()">审阅BUG</a></li>
+                <li><a href="javascript:load_news_view()">新闻管理</a></li>
+                <li><a href="javascript:load_rank_view()">实时排名</a></li>
+                <li><a href="javascript:load_system_view()">系统设置</a></li>
+            </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" id="content" style="position: relative">
+        </div>
+    </div>
+</div>
+<script src="{% static 'bug_vote/js/jquery.min.js' %}"></script>
+<script src="{% static 'bug_vote/js/bootstrap.min.js' %}"></script>
+<script src="{% static  'bug_vote/js/csrf_ajax.js' %}"></script>
+
+<script>
+
+    $(document).ready(function () {
+        load_users_view();
+    });
+
+
+    function load_users_view() {
+        $("#content").load("/manage/user_list/");
+    }
+    function load_records_view() {
+        $("#content").load("/manage/bug_list/");
+    }
+    function load_news_view() {
+        $("#content").load("/manage/news_list/");
+    }
+    function load_system_view() {
+        $("#content").load("/manage/system_setting/");
+    }
+    function load_rank_view() {
+        $("#content").load("/manage/rank_list/");
+    }
+    function logout_ajax() {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("GET", "/api/manage/logout/", false);
+        xmlhttp.send();
+        location.href = "/manage/";
+    }
+</script>
+</body>
+</html>

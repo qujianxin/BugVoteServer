@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    {% load staticfiles %}
+        <title>登陆</title>
+
+    {% include "html_head.html" %}
+    <style>
+        .navbar {
+            margin-bottom: 0px;
+            border-radius: 0px;
+        }
+
+        .jumbotron {
+            height: 50px;
+            /*background-attachment:fixed;*/
+            background: no-repeat 0 -400px;
+            background-size: 100%;
+        }
+
+        .reg-box {
+            width: 330px;
+            border-radius: 10px;
+            /*background-color: lightgrey;*/
+        }
+
+        .form-group {
+            position: relative;
+            padding: 6px;
+        }
+
+        .form-control {
+            height: 40px;
+        }
+
+        .btn-success {
+            height: 38px;
+            padding: 8px;
+        }
+
+        /*      span {
+                position: absolute;
+                left: 400px;
+                top: 15px;
+              }*/
+        .visible-xs {
+            font-size: 40px;
+            text-align: center;
+        }
+
+        .reg-head {
+            width: 600px;
+            padding: 30px 0;
+            position: relative;
+
+        }
+
+        .register-font {
+            font-size: 40px;
+            text-align: center;
+            position: absolute;
+            left: 200px;
+            top: 20px;
+            width: 180px;
+            background-color: #FFF;;
+        }
+
+        .suc-box {
+            margin-top: 70px;
+            text-align: center;
+            width: 500px;
+            height: 300px;
+            background-color: lightgrey;
+            /*border: 1px solid lightgrey;*/
+            border-radius: 5px;
+        }
+
+        .suc-box h1 {
+            margin: 70px;
+        }
+
+        .suc-box a {
+            font-size: 15px;
+        }
+
+        .foot-box {
+            margin-top: 40px;
+            font-size: 15px;
+            text-align: center;
+            background: #F5F5F5 none repeat scroll 0% 0%;
+            height: 70px;
+            /*width:330px;*/
+            line-height: 70px;
+        }
+
+        /*      .nav-pills > li > a{
+                border-radius: 20px;
+              }*/
+    </style>
+</head>
+<body>
+{% include "head.html" %}
+
+
+<div class="container reg-head hidden-xs">
+    <hr/>
+    <p class="register-font">用户登录</p>
+</div>
+
+
+<div class="container reg-box">
+    <form class="form" action="javascript:login_ajax()" method="post">
+        <div class="visible-xs">
+            <p>登录</p>
+        </div>
+        <div id="warn_msg" class="form-group alert alert-danger hide"></div>
+        <div class="form-group">
+            <input type="text" name="phone_number" class="form-control" placeholder="用户名（手机号）">
+        </div>
+        <div class="form-group">
+            <input type="password" name="password" class="form-control" placeholder="密码">
+        </div>
+
+        <div class="form-group">
+            <div style="display:inline-block">
+                <div class="checkbox">
+                    <label>
+                        <input name="remember" type="checkbox" checked="checked"> 记住我
+                    </label>
+                    <a href="javascript:;" style="padding-left:10px">忘记密码</a>
+                </div>
+            </div>
+            <button class="btn btn-success pull-right" type="submit" style="width: 40%;display:inline-block">登录</button>
+        </div>
+
+        <div class="foot-box">
+            还没有账号？
+            <a href="/register/">立即注册</a>
+        </div>
+
+    </form>
+</div>
+
+
+<script src="{% static 'bug_vote/js/jquery.min.js' %}"></script>
+<script src="{% static  'bug_vote/js/csrf_ajax.js' %}"></script>
+<script language="JavaScript">
+    function login_ajax() {
+        var phone = document.getElementsByName("phone_number")[0].value;
+        var pass = document.getElementsByName("password")[0].value;
+        var remember = document.getElementsByName("remember")[0].checked;
+        $.post("/api/log_in/", {
+                    phone_number: phone,
+                    password: pass,
+                    remember: remember
+                }, function (result) {
+                    if (result.is_success) {
+                        location.href = "/";
+                    } else {
+                        var ele = $("#warn_msg");
+                        ele.removeClass("hide");
+                        ele.text(result.msg);
+                    }
+                }
+        )
+    }
+</script>
+{% include 'footer.html' %}
+
+</body>
+</html>

@@ -1,0 +1,171 @@
+<div class="container-fluid">
+
+    <div class="row">
+
+        <div class="main" style="position: relative">
+
+            {% if user %}
+                <h2 class="sub-header">个人信息</h2>
+            {% else %}
+                <h2 class="sub-header">Bug记录</h2>
+            {% endif %}
+            {% if index %}
+                <a href="javascript:load_records(true,1,{{ phone_number }});" type="button"
+                   class="btn btn-success btn-lg"
+                   style="position: absolute;top:30px;right: 150px;">已审阅</a>
+                <a href="javascript:load_records(false,1,{{ phone_number }});" type="button"
+                   class="btn btn-danger btn-lg"
+                   style="position: absolute;top:30px;right: 40px;">未审阅</a>
+            {% else %}
+                <a href="javascript:load_records(true,1,null);" type="button"
+                   class="btn btn-success btn-lg"
+                   style="position: absolute;top:30px;right: 150px;">已审阅</a>
+                <a href="javascript:load_records(false,1,null);" type="button"
+                   class="btn btn-danger btn-lg"
+                   style="position: absolute;top:30px;right: 40px;">未审阅</a>
+            {% endif %}
+            {% if user %}
+                <p>姓名: {{ user.name }}</p>
+                <p>E-mail: {{ user.email }}</p>
+                <p>学校: {{ user.school }}</p>
+                <p>专业: {{ user.major }}</p>
+                <p>地址: {{ user.address }}</p>
+                <p>总奖金: {{ user.bonus }}</p>
+                <p>Bug数: {{ user.bug_number }}</p>
+                <p>排名: {{ user.rank }}</p>
+            {% endif %}
+
+
+            {% for record in record_list %}
+
+                <div class="panel panel-warning">
+                    <div class="panel-heading" style="position: relative">
+                        <h1 class="panel-title">
+                            Bug类型 : {{ record.bug_type }}
+                        </h1>
+
+                        <p style="display: inline-block;position: absolute;right: 260px;top: 10px">提交者 : <a
+                                href="javascript:load_records(null,1,{{ record.commit_person.phone_number }});"
+                                style="color: #337ab7;"><strong>{{ record.commit_person.name }}</strong></a></p>
+
+                        <p style="display: inline-block;position: absolute;right: 50px;top: 10px">
+                            提交时间：{{ record.created }}</p>
+                    </div>
+                    <div class="panel-body">
+                        {{ record.information }}
+                    </div>
+                    <div class="panel-body">
+                        {% if record.have_seen %}
+                            <div id="magic_place_{{ record.id }}">
+                                {% ifequal record.bonus 0 %}
+                                    <p style="display: inline-block"><strong>没给奖金（未通过）</strong></p>
+                                    <a type="button" href="javascript:to_edit_status({{ record.id }})"
+                                       class="btn btn-default"
+                                       style="display: inline-block">修改</a>
+                                {% else %}
+                                    <p style="display: inline-block">奖金 : <strong style="color: red"> {{ record.bonus }}
+                                        ￥</strong></p>
+                                    <a href="javascript:to_edit_status({{ record.id }})" type="button"
+                                       class="btn btn-default"
+                                       style="display: inline-block">修改
+                                    </a>
+                                {% endifequal %}
+                            </div>
+
+                        {% else %}
+                            <form id="magic_place_{{ record.id }}" class="form-inline"
+                                  action="javascript:to_pass_status({{ record.id }});">
+                                <div class="form-group">
+                                    <label for="bargain_none">奖金</label>
+                                    <input id="bonus_{{ record.id }}" type="text" class="form-control"
+                                           placeholder="￥">
+                                </div>
+                                <button type="submit" class="btn btn-success">确定</button>
+                                <a type="button" href="javascript:to_nopass_status({{ record.id }})"
+                                   class="btn btn-danger" style="display: inline-block">不给奖金</a>
+                            </form>
+                        {% endif %}
+
+                    </div>
+                </div>
+            {% empty %}
+                <div class="form-group alert alert-danger">暂时没有提交的Bug记录</div>
+            {% endfor %}
+
+
+        </div>
+    </div>
+    <nav class="text-center">
+        <ul class="pagination">
+            <!--           <li>
+                          <a href="#" aria-label="Previous">
+                              <span aria-hidden="true">&laquo;</span>
+                          </a>
+                      </li> -->
+            {% for foo in page %}
+                <li {% ifequal index foo %}
+                    class="active"
+                {% endifequal %}
+                        ><a href="javascript:load_records({{ have_seen }},{{ foo }},{{ phone_number }});">{{ foo }}</a>
+                </li>
+            {% endfor %}
+
+            <!--            <li>
+                            <a href="#" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li> -->
+        </ul>
+    </nav>
+</div>
+<script>
+
+
+    function load_records(have_seen, index, phone_number) {
+        var url = "/manage/bug_list/?index=" + index;
+        if (phone_number != null) {
+            url += "&phone_number=" + phone_number;
+        }
+        if (have_seen != null) {
+            url += "&have_seen=" + have_seen
+        }
+        $("#content").load(url)
+    }
+
+    function to_edit_status(id) {
+        var element = $("#magic_place_" + id);
+        element.parent().append('<form id="magic_place_' + id + '" class="form-inline" action="javascript:to_pass_status(' + id + ');"> <div class="form-group"> <label for="bonus_' + id + '">奖金</label> <input type="text" class="form-control" id="bonus_' + id + '" placeholder="￥"> </div> <button type="submit" class="btn btn-success">确定</button> <a type="button" href="javascript:to_nopass_status(' + id + ')" class="btn btn-danger" style="display: inline-block">不给奖金</a>');
+        element.remove()
+    }
+    function to_pass_status(id) {
+        var bonus = $("#bonus_" + id).val();
+        if (bonus == 0) {
+            return to_nopass_status(id)
+        }
+        $.post("/api/manage/update_bonus/", {
+            id: id,
+            bonus: bonus
+        }, function (result) {
+            if (result.is_success) {
+                var element = $("#magic_place_" + id);
+                element.parent().append('<div id="magic_place_' + id + '"> <p style="display: inline-block">奖金 : <strong style="color: red">' + bonus + '￥</strong></p> <a href="javascript:to_edit_status(' + id + ')" type="button"class="btn btn-default"style="display: inline-block">修改 </a> </div>');
+                element.remove()
+            }
+        });
+
+    }
+    function to_nopass_status(id) {
+        $.post("/api/manage/update_bonus/", {
+            id: id,
+            bonus: 0
+        }, function (result) {
+            if (result.is_success) {
+                var element = $("#magic_place_" + id);
+                element.parent().append('<div id="magic_place_' + id + '"> <p style="display: inline-block"><strong>没给奖金（未通过）</strong></p> <a type="button" href="javascript:to_edit_status(' + id + ')" class="btn btn-default" style="display: inline-block">修改</a> </div>');
+                element.remove()
+            }
+        });
+
+
+    }
+</script>

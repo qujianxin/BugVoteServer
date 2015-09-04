@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    {% load staticfiles %}
+    {% include 'html_head.html' %}
+    <title>个人中心</title>
+</head>
+<body>
+<!-- Fixed navbar -->
+{% include "head.html" %}
+
+<div class="container">
+    <div class="page-header">
+        <h1>个人中心</h1>
+    </div>
+    <div class="col-xs-12 col-sm-9" id="sidebar">
+        {% for record in user.bugrecord_set.all %}
+            <div class="panel panel-default">
+                <div class="panel-heading" style="position: relative">
+                    <h1 class="panel-title">{{ record.bug_type }}</h1>
+
+                    <p style="display: inline-block;position: absolute;right: 50px;top: 10px">
+                        提交时间：{{ record.created }}</p>
+                </div>
+                <div class="panel-body">
+                    {{ record.information }}
+                </div>
+                <div class="panel-body">
+                    {% ifequal record.bonus 0 %}
+                        {% if record.have_seen %}
+                            <button type="button" class="btn btn-danger pull-right"><strong>未通过</strong></button>
+                        {% else %}
+                            <button type="button" class="btn btn-warning pull-right"><strong>已提交</strong></button>
+                        {% endif %}
+                    {% else %}
+                        <button type="button" class="btn btn-success pull-right">
+                            <strong>已过审 {{ record.bonus }}￥</strong></button>
+
+                    {% endifequal %}
+
+                </div>
+            </div>
+
+        {% empty %}
+
+            <div style="height: 400px;border-radius: 5px; background-color: #F5F5F5;text-align: center;padding-top: 150px">
+                <h2>您还没有提交任何BUG~</h2>
+                <a href="/submit/" style="font-size: 20px;margin-top: 30px">马上提交</a>
+            </div>
+        {% endfor %}
+
+
+    </div>
+
+    <div class="col-xs-12 col-sm-3">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h1 class="panel-title">
+                    我的账户
+                </h1>
+
+            </div>
+            <div class="panel-body">
+                <p>账号：{{ user.phone_number }}</p>
+
+                <P>BUG数：{{ user.bug_number }}</P>
+
+                <p>奖金：{{ user.bonus }}</p>
+
+                <p>排名：{% ifequal user.rank 0 %}未更新{% else %}{{ user.rank }}{% endifequal %}</p>
+            </div>
+        </div>
+
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h1 class="panel-title">
+                    个人信息
+                </h1>
+                <a id="edit_corner" href="javascript:void(0)" class="pull-right" style="margin-top: -17px">编辑</a>
+            </div>
+            <div class="panel-body">
+
+                <div id="noma">
+                    <p>学校：<span id="user-school">{{ user.school }}</span></p>
+
+                    <p>专业：<span id="user-major">{{ user.major }}</span></p>
+
+                    <p>姓名：<span id="user-name">{{ user.name }}</span></p>
+
+                    <p>邮箱：<span id="user-email">{{ user.email }}</span></p>
+
+                    <p>地址：<span id="user-address">{{ user.address }}</span></p>
+                </div>
+
+                <form id="edit_form" action="javascript:edit_ajax()" hidden="hidden">
+                    <p>学校：<input type="text" id="school" value="{{ user.school }}"/></p>
+
+                    <p>专业：<input type="text" id="major" value="{{ user.major }}"/></p>
+
+                    <p>姓名：<input type="text" id="name" value="{{ user.name }}"/></p>
+
+                    <p>邮箱：<input type="text" id="email" value="{{ user.email }}"/></p>
+
+                    <p>地址：<input type="text" id="address" value="{{ user.address }}"/></p>
+                    <button type="submit" class="btn btn-success btn-block center-block" role="button"
+                            style="width: 100px;">修改
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins)-->
+<script src="{% static 'bug_vote/js/jquery.min.js' %}"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="{% static 'bug_vote/js/bootstrap.min.js' %}"></script>
+<script src="{% static  'bug_vote/js/csrf_ajax.js' %}"></script>
+
+<script>
+    $(document).ready(function () {
+                use_form('#edit_corner');
+
+                function use_form(element) {
+                    $(element).on({
+                        click: function () {
+                            $('#edit_form').show();
+                            $('#noma').hide();
+                        }
+                    });
+                }
+            }
+    );
+
+    function edit_ajax() {
+        var name = $('#name').val();
+        var school = $('#school').val();
+        var email_ele = $('#email');
+        var email = email_ele.val();
+        var address = $('#address').val();
+        var major = $('#major').val();
+
+        var pattern = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+/;
+        if (!pattern.test(email)) {
+            email_ele.focus();
+            return;
+        }
+
+        $.post('/api/edit_user/', {
+            name: name,
+            school: school,
+            email: email,
+            address: address,
+            major: major
+        }, function (result) {
+            if (result.is_success) {
+                $('#edit_form').hide();
+                $('#noma').show();
+                $('#head_name').text(name);
+                $('#user-name').text(name);
+                $('#user-school').text(school);
+                $('#user-email').text(email);
+                $('#user-address').text(address);
+                $('#user-major').text(major);
+            }
+        })
+    }
+
+</script>
+{% include 'footer.html' %}
+</body>
+</html>

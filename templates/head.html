@@ -1,0 +1,48 @@
+{% load staticfiles %}
+
+<nav class="navbar navbar-inverse">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/"><img alt="" width="30"
+                                                  src="{% static 'bug_vote/image/logo.png' %}"></a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/">首页</a></li>
+                <li><a href="/submit/">我要提交</a></li>
+                <li><a href="/rank_list/">比赛排名</a></li>
+                <li><a href="/news_list/">赛事动态</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+
+                {% if name %}
+                    <li><a href="/person/" style="color: #337ab7;"><strong><span
+                            id="head_name"> {{ name }}</span></strong></a></li>
+                    <li><a href="javascript:logout_ajax()">注销</a></li>
+                {% else %}
+                    <li><a href="/login/">登录</a></li>
+                    <li><a href="/register/">注册</a></li>
+                {% endif %}
+            </ul>
+
+        </div>
+        <!--/.nav-collapse -->
+        {% if name %}
+            <script>
+                function logout_ajax() {
+                    var xmlhttp = new XMLHttpRequest();
+                    xmlhttp.open("GET", "/api/log_out/", false);
+                    xmlhttp.send();
+                    location.reload()
+                }
+            </script>
+        {% endif %}
+    </div>
+</nav>

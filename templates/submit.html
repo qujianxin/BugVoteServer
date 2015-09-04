@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    {% load staticfiles %}
+    <title>提交bug</title>
+
+    {% include "html_head.html" %}
+
+    <style>
+        .navbar {
+            margin-bottom: 0px;
+            border-radius: 0px;
+        }
+
+        .jumbotron {
+            height: 50px;
+            /*background-attachment:fixed;*/
+            background: no-repeat 0 -400px;
+            background-size: 100%;
+        }
+
+        .reg-box {
+            width: 390px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group span {
+            position: absolute;
+            left: 370px;
+            top: 15px;
+        }
+
+        .visible-xs {
+            font-size: 40px;
+            text-align: center;
+        }
+
+        .form-group {
+            padding: 6px;
+        }
+
+        .reg-head {
+            width: 600px;
+            padding: 30px 0;
+            position: relative;
+
+        }
+
+        .register-font {
+            font-size: 40px;
+            text-align: center;
+            position: absolute;
+            left: 200px;
+            top: 20px;
+            width: 180px;
+            background-color: #FFF;;
+        }
+
+        .control-label {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<!-- Fixed navbar -->
+{% include "head.html" %}
+
+<div class="container">
+    <div class="page-header">
+        <h1>BUG提交</h1>
+    </div>
+    <form class="form-horizontal" method="post" action="javascript:submit_ajax()">
+
+        <div id="warn_msg" class="form-group alert alert-danger hide"></div>
+
+        <div class="form-group">
+            <label for="content-bug" class="col-sm-2 control-label">BUG提交内容</label>
+
+            <div class="col-sm-8">
+                <textarea class="form-control" id="content-bug" rows="4"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="select-bug" class="col-sm-2 control-label">请选择BUG类型</label>
+
+            <div class="col-sm-4">
+                <select class="form-control" id="select-bug">
+                    {% for type in type_list %}
+                        <option value="{{ type.id }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-success btn-lg" style="width: 15%">提交</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="{% static 'bug_vote/js/jquery.min.js' %}"></script>
+<script src="{% static  'bug_vote/js/csrf_ajax.js' %}"></script>
+<script language="JavaScript">
+    function submit_ajax() {
+        var information = $('#content-bug').val();
+        var select_type = $("#select-bug").val();
+        if (information == "") {
+            var ele = $("#warn_msg");
+            ele.removeClass("hide");
+            ele.text("提交内容不可为空");
+            return;
+        }
+
+        $.post("/api/submit_bug/", {
+                    information: information,
+                    bug_type: select_type
+                }, function (result) {
+                    if (result.is_success) {
+                        location.href = "/person/";
+                    } else {
+                        var ele = $("#warn_msg");
+                        ele.removeClass("hide");
+                        ele.text(JSON.stringify(result.msg));
+                        return;
+                    }
+                }
+        )
+    }
+</script>
+
+{% include 'footer.html' %}
+
+
+</body>
+</html>

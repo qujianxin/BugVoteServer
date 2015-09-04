@@ -1,0 +1,66 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="main">
+            <h2 class="sub-header">添加新闻</h2>
+
+            <div id="warn_msg" class="form-group alert alert-danger hide"></div>
+            <form class="form show" action="javascript:submit_ajax();">
+                <div class="form-group">
+                    <label for="head_news" class="control-label"
+                           style="font-size: large;padding-top:0;font-weight: 100">新闻标题：</label>
+
+                    <input type="text" class="form-control" id="title_news" placeholder="标题">
+
+                </div>
+                <div class="form-group">
+                    <label for="head_news" class="control-label"
+                           style="font-size: large;padding-top:0;font-weight: 100">作者：</label>
+
+                    <input type="text" class="form-control" id="author_news" placeholder="作者">
+
+                </div>
+                <div class="form-group">
+                    <label for="content-news" class="control-label"
+                           style="font-size: large;padding-top:0;font-weight: 100">新闻正文：</label>
+
+                    <textarea class="form-control" id="content_news" rows="10" placeholder="正文"></textarea>
+
+                </div>
+                <div class="form-group">
+
+                    <button type="submit" class="btn btn-success btn-lg" style="width: 15%">提交</button>
+
+                </div>
+            </form>
+
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function submit_ajax() {
+        var title = $("#title_news").val();
+        var author = $("#author_news").val();
+        var context = $("#content_news").val();
+        if (title == "" || author == "" || context == "") {
+            var ele = $("#warn_msg");
+            ele.removeClass("hide");
+            ele.text("不可有空项");
+            return;
+        }
+        $.post("/api/manage/post_news/", {
+            title: title,
+            author: author,
+            context: context
+        }, function (result) {
+            if (result.is_success) {
+                $("#content").load("/manage/news_list/")
+            } else {
+                var ele = $("#warn_msg");
+                ele.removeClass("hide");
+                ele.text(JSON.stringify(result.msg));
+            }
+        })
+    }
+</script>

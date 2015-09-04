@@ -1,0 +1,143 @@
+<div class="container-fluid">
+
+    <div class="row">
+
+        <div class="modal fade" id="delete_button" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">删除</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>您确定要删除此条信息么？</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <a type="button" href="javascript:delete_news({{ news.id }})"
+                           class="btn btn-primary">确定</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main">
+            <h2 class="sub-header">新闻详情</h2>
+
+            <div id="news_details">
+                <button type="button" class="btn btn-danger pull-right" data-toggle="modal"
+                        data-target="#delete_button">删除
+                </button>
+                <button id="modified" type="button" class="btn btn-info pull-right">修改</button>
+
+                <br/>
+
+                <h2 class="text-center">{{ news.title }}</h2>
+
+                <p class="text-center">作者 : {{ news.author }} | 发布时间 : {{ news.time }}</p>
+
+                <div style="font-size: 16px;line-height: 30px">
+                    {% for line in news_content %}
+                        <p>{{ line }}</p>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <form id="edit_news" class="form" hidden="hidden">
+                <div id="warn_msg" class="form-group alert alert-danger hide"></div>
+
+                <div class="form-group">
+                    <label for="news_title" class="control-label"
+                           style="font-size: large;padding-top:0;font-weight: 100">新闻标题：</label>
+
+                    <input type="text" class="form-control" id="news_title" value="{{ news.title }}">
+
+                </div>
+                <div class="form-group">
+                    <label for="news_author" class="control-label"
+                           style="font-size: large;padding-top:0;font-weight: 100">新闻标题：</label>
+
+                    <input type="text" class="form-control" id="news_author" value="{{ news.author }}">
+
+                </div>
+                <div class="form-group">
+                    <label for="news_content" class="control-label"
+                           style="font-size: large;padding-top:0;font-weight: 100">新闻正文：</label>
+
+                    <textarea class="form-control" id="news_content" rows="10"
+                            >{{ news.context }}</textarea>
+
+                </div>
+                <div class="form-group">
+
+                    <a type="submit" href="javascript:edit_news({{ news.id }});" class="btn btn-success btn-lg"
+                       style="width: 15%">提交</a>
+                    <a href="javascript:cancel_edit();" type="button" class="btn btn-warning btn-lg"
+                       style="width: 15%">取消</a>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+                modify('#modified', '#edit_news', '#news_details');
+
+                function modify(element, block1, block2) {
+                    $(element).on({
+                        click: function () {
+                            $(block1).show();
+                            $(block2).hide();
+                        }
+                    });
+                }
+            }
+    );
+
+    function edit_news(id) {
+        var title = $("#news_title").val();
+        var author = $("#news_author").val();
+        var context = $("#news_content").val();
+        if (title == "" || author == "" || context == "") {
+            var ele = $("#warn_msg");
+            ele.removeClass("hide");
+            ele.text("不可有空项");
+            return;
+        }
+        $.post("/api/manage/update_news/", {
+            id: id,
+            title: title,
+            author: author,
+            context: context
+        }, function (result) {
+            if (result.is_success) {
+                $("#content").load("/manage/news_list/")
+            } else {
+                var ele = $("#warn_msg");
+                ele.removeClass("hide");
+                ele.text(JSON.stringify(result.msg));
+            }
+        })
+    }
+
+    function delete_news(id) {
+        var delete_button = $("#delete_button");
+        delete_button.modal("hide");
+        delete_button.on("hidden.bs.modal", function () {
+            $.get("/api/manage/delete_news/?id=" + id, function (result) {
+                if (result.is_success) {
+                    $("#content").load("/manage/news_list/");
+                }
+            })
+        });
+    }
+
+    function cancel_edit() {
+        $("#content").load("/manage/news_list/");
+    }
+
+</script>

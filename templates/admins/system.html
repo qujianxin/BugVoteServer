@@ -1,0 +1,225 @@
+<div class="main" style="position: relative">
+
+    <h1 class="page-header">系统设置</h1>
+    请注意任何一项设置成功后页面会刷新,请一次只设置一项
+    <h2 class="sub-header">上传主页图片</h2>
+
+    <h4>已上传的图片</h4>
+
+    <div id="pictures_div" class="row">
+        {% for picture in publicity_pictures %}
+            <div class="col-sm-4" id="picture_{{ picture.id }}" style="position: relative"
+                 onmouseover="show_delete_button('pic_{{ picture.id }}')"
+                 onmouseout="hide_delete_button('pic_{{ picture.id }}')">
+                <img src="{{ picture.image.url }}" alt="" style="width: 100%"/>
+
+                <div id="pic_{{ picture.id }}" hidden="hidden">
+                    <a href="javascript:delete_picture({{ picture.id }})" class="btn"
+                       style="position: absolute;top:10px;right:30px;border: 1px solid lightgray;border-radius: 4px;color: gray">删除</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <hr/>
+
+    <h4>上传新的图片</h4>
+
+    <div id="warn_msg1" class="form-group alert alert-danger hide"></div>
+
+    <form class="form-horizontal" id="image_form" method="post" action="javascript:post_picture_ajax()">
+
+        <div class="form-inline">
+            <div class="form-group" style="margin-left: 0;margin-right: 0">
+                <input type="file" id="imagefile" name="image"/>
+            </div>
+            <div class="form-group" style="margin-left: 0;margin-right: 0">
+                <label for="addr">点击图片跳转的链接 : </label>
+                <input name="desc" placeholder="如 http://www.baidu.com/ 或不填" id="addr" type="text" class="form-control"
+                       style="width: 366px"/>
+            </div>
+        </div>
+        <br/>
+        <br/>
+        <button class="btn btn-default" type="submit">上传</button>
+    </form>
+
+
+    <h2 class="sub-header" style="margin-top: 40px">比赛终止时间</h2>
+
+    <div id="warn_msg2" class="form-group alert alert-danger hide"></div>
+
+    <p>比赛终止时间：<span id="end_time_show"> {{ end_time }}</span></p>
+
+    <form class="form-inline" method="get" id="end_time_form" action="javascript:update_time_ajax()">
+
+        <div class="form-group">
+            <div class="input-group">
+                <div class="input-group-addon">比赛终止时间:</div>
+                <input class="form-control" id="end_time" name="end_time" type="text" placeholder="0000-00-00"/>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-default">更新</button>
+        (注意为所填日期零点)
+    </form>
+
+    <h2 class="sub-header" style="margin-top: 40px">Bug类型管理</h2>
+
+
+    <form class="form-horizontal" action="">
+        <div class="form-group">
+            <label for="select_multi" class="control-label col-sm-2" style="width: auto">现有的BUG类型:</label>
+
+            <div class="col-sm-3">
+                <select class="form-control" size="5" id="select_multi">
+                    {% for bug_type in bug_types %}
+                        <option value="{{ bug_type.id }}">{{ bug_type }}</option>
+                    {% endfor %}
+
+                </select>
+            </div>
+            <p class="help-block">可选择一个选项后进行修改</p>
+            <button id="btn_edit" type="button" class="btn btn-default">修改</button>
+            <div class="col-sm-4 form-inline" hidden="hidden" id="edit_type">
+                <input type="text" class="form-control" id="edit_detail" value="11"/>
+                <a href="javascript:edit_bug_type();" class="btn btn-default">提交</a>
+                <a id="cancel_edit_type" class="btn btn-default">取消</a>
+            </div>
+
+        </div>
+    </form>
+    <form class="form-horizontal" action="">
+        <div class="form-group">
+            <label for="add_bug" class="control-label col-sm-2" style="width: auto">添加新BUG类型:</label>
+
+            <div class="col-sm-5">
+                <input type="text" class="form-control" id="add_bug"/>
+            </div>
+            <a href="javascript:add_bug_type()" class="btn btn-default" type="submit">添加</a>
+        </div>
+
+    </form>
+    <br/><br/>
+
+</div>
+{% load staticfiles %}
+<script src="{% static 'bug_vote/js/jquery.form.min.js' %}"></script>
+<script>
+
+    $(document).ready(function () {
+        $('#btn_edit').click(function () {
+            var find = $('#select_multi').find('option:selected');
+            var select = find.val();
+            if (select == undefined) {
+                return;
+            }
+            $('#edit_type').show();
+            $(this).hide();
+            $('#edit_detail').val(find.text());
+        });
+
+        $("#cancel_edit_type").click(function () {
+            $('#edit_type').hide();
+            $('#btn_edit').show();
+        })
+    });
+
+    function edit_bug_type() {
+        var new_type = $('#edit_detail').val();
+        if (new_type == "") {
+            return;
+        }
+        var old_type = $('#select_multi').find('option:selected').val();
+        $.post("/api/manage/update_bug_type/", {
+            new_type: new_type,
+            id: old_type
+        }, function (result) {
+            if (result.is_success) {
+                $("#content").load("/manage/system_setting/");
+            }
+        })
+    }
+
+    function add_bug_type() {
+        var new_type = $("#add_bug").val();
+        if (new_type == "") {
+            return;
+        }
+        $.post("/api/manage/post_bug_type/", {
+            new_type: new_type
+        }, function (result) {
+            if (result.is_success) {
+                $("#content").load("/manage/system_setting/");
+            }
+        })
+    }
+
+    function show_delete_button(id) {
+        $("#" + id).show();
+    }
+    function hide_delete_button(id) {
+        $("#" + id).hide();
+    }
+
+    function delete_picture(id) {
+        $.get("/api/manage/delete_publicity/?id=" + id, function (result) {
+            if (result.is_success) {
+                $("#picture_" + id).remove()
+            }
+        })
+    }
+
+    function update_time_ajax() {
+        var time = $("#end_time").val();
+        var pattern = /\d{4}-\d{2}-\d{2}/;
+        if (!pattern.test(time)) {
+            var ele = $("#warn_msg2");
+            ele.removeClass("hide");
+            ele.text("请输入正确的格式");
+            return;
+        }
+        $("#end_time_form").ajaxSubmit({
+            url: "/api/manage/update_end_time/",
+            success: function (result) {
+                if (result.is_success) {
+                    $("#content").load("/manage/system_setting/")
+                } else {
+                    var ele = $("#warn_msg2");
+                    ele.removeClass("hide");
+                    ele.text(JSON.stringify(result.msg));
+                    return;
+                }
+            }
+        })
+    }
+
+    function post_picture_ajax() {
+        var filepath = $("#imagefile").val();
+        var types = "jpg|jpeg|png|gif|bmp";
+        var pattern = /.*(jpg|jpeg|png|gif|bmp|JPG|JPEG|PNG|GIF|BMP)/;
+        if (!pattern.test(filepath)) {
+            var ele = $("#warn_msg1");
+            ele.removeClass("hide");
+            ele.text("请上传图片 " + types);
+            return;
+        }
+
+
+        var imageForm = $("#image_form");
+        imageForm.ajaxSubmit({
+            url: "/api/manage/post_publicity/",
+            success: function (result) {
+                if (result.is_success) {
+                    $("#content").load("/manage/system_setting/")
+                } else {
+                    var ele = $("#warn_msg1");
+                    ele.removeClass("hide");
+                    ele.text(JSON.stringify(result.msg));
+                    return;
+                }
+            }
+        })
+
+    }
+
+
+</script>

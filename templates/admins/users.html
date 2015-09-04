@@ -1,0 +1,68 @@
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="main">
+            <h2 class="sub-header">用户名单</h2>
+            <table class="table table-hover table-striped">
+                <thead>
+                <tr>
+                    <th>名字</th>
+                    <th>学校</th>
+                    <th>专业</th>
+                    <th>Email</th>
+                    <th>手机号</th>
+                    <th>提交数</th>
+                    <th>总奖金</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in user_list %}
+                    <tr>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.school }}</td>
+                        <td>{{ user.major }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.phone_number }}</td>
+                        <td>{{ user.bug_number }}</td>
+                        <td>{{ user.bonus }}</td>
+                        <td>
+                            <a href="javascript:check_user_records({{ user.phone_number }})" class="btn btn-default">查看详情</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <div class="form-group alert alert-danger">暂时没有信息</div>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <nav class="text-center">
+                <ul class="pagination">
+                    {% for foo in page %}
+                        <li {% ifequal index foo %}
+                            class="active"
+                        {% endifequal %}
+                                ><a
+                                href="javascript:load_users({{ order_by }},{{ foo }});">{{ foo }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+
+        </div>
+    </div>
+
+
+</div>
+<script>
+    function load_users(order_by, index) {
+        var url = "/manage/user_list/?index=" + index;
+        if (order_by != null) {
+            url += "&order_by=" + order_by;
+        }
+        $("#content").load(url);
+    }
+
+    function check_user_records(phone_number) {
+        $("#content").load("/manage/bug_list/?phone_number=" + phone_number);
+    }
+</script>

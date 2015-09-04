@@ -1,0 +1,52 @@
+<div class="container-fluid">
+
+    <div class="row">
+
+        <div class="main">
+            <h2 class="sub-header">新闻列表</h2>
+            <a href="javascript:load_post_news();" type="button" class="btn btn-success btn-lg"
+               style="position: absolute;top:50px;right: 200px;">添加新闻</a>
+
+            <div class="list-group">
+                {% for news in news_list %}
+                    <a href="javascript:load_one_news({{ news.id }});" class="list-group-item " style="border: 0px">
+                        <h3 class="list-group-item-heading">{{ news.title }}</h3>
+
+                        <p></p>
+
+                        <p class="list-group-item-text text-muted">
+                            <small>作者 : {{ news.author }} | 发布日期 : {{ news.time }}</small>
+                        </p>
+                    </a>
+                    <hr/>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+    <nav class="text-center">
+        <ul class="pagination">
+            {% for foo in page %}
+                <li {% ifequal index foo %}
+                    class="active"
+                {% endifequal %}
+                        ><a href="javascript:load_news_list({{ foo }});">{{ foo }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </nav>
+</div>
+
+<script>
+    function load_news_list(index) {
+        $("#content").load("/manage/news_list/?index=" + index);
+    }
+
+    function load_post_news() {
+        $("#content").load("/manage/post_news/")
+    }
+
+    function load_one_news(id) {
+        $("#content").load("/manage/check_news/?id=" + id)
+    }
+</script>

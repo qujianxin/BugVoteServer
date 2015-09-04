@@ -1,0 +1,36 @@
+<html lang="zh-CN">
+<head>
+    {% load staticfiles %}
+    {% include "html_head.html" %}
+    <title>新闻动态</title>
+<body>
+
+{% include "head.html" %}
+
+<div class="container">
+    <div class="page-header" style="padding-top: 40px">
+        <h1>新闻动态</h1>
+    </div>
+
+    <div class="list-group">
+        {% for news in news_list %}
+            <a href="/news/{{ news.id }}/" class="list-group-item " style="border: 0">
+                <h3 class="list-group-item-heading">{{ news.title }}
+                </h3>
+
+                <p></p>
+
+                <p class="list-group-item-text text-muted">
+                    <small>发布时间：{{ news.time }}</small>
+                </p>
+            </a>
+            <hr/>
+        {% endfor %}
+
+
+    </div>
+</div>
+
+{% include 'footer.html' %}
+</body>
+</html>

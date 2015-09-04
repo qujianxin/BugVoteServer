@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    {% load staticfiles %}
+    {% include 'html_head.html' %}
+    <title>注册</title>
+    <style>
+        .navbar {
+            margin-bottom: 0px;
+            border-radius: 0px;
+        }
+
+        .jumbotron {
+            height: 50px;
+            /*background-attachment:fixed;*/
+            background-position: 0 -400px;
+            background-repeat: no-repeat;
+            background-size: 100%;
+        }
+
+        .reg-box {
+            width: 390px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        #register_form .form-group span {
+            position: absolute;
+            left: 370px;
+            top: 15px;
+        }
+
+        .visible-xs {
+            font-size: 40px;
+            text-align: center;
+        }
+
+        .form-group {
+            padding: 6px;
+        }
+
+        .reg-head {
+            width: 600px;
+            padding: 30px 0;
+            position: relative;
+
+        }
+
+        .register-font {
+            font-size: 40px;
+            text-align: center;
+            position: absolute;
+            left: 200px;
+            top: 20px;
+            width: 180px;
+            background-color: #FFF;;
+        }
+
+        .form-control {
+            height: 40px;
+        }
+
+        .alert_err {
+            color: red;
+            height: 40px;
+            border: 1px solid #EED3D7;
+            background: #F2DEDE none repeat scroll 0% 0%;
+        }
+
+        .suc-box {
+            margin-top: 70px;
+            text-align: center;
+            width: 500px;
+            height: 300px;
+            background-color: #F5F5F5;
+            /*border: 1px solid lightgrey;*/
+            border-radius: 5px;
+        }
+
+        .suc-box h1 {
+            margin: 70px;
+        }
+
+        .suc-box a {
+            font-size: 15px;
+        }
+
+        .reg-tips-err {
+            position: absolute;
+            right: -140px;
+            top: 6px;
+            width: 130px;
+            padding: 5px;
+            font-size: 12px;
+            border-radius: 5px;
+            overflow: hidden;
+            text-align: left;
+            line-height: 28px;
+            background: #FFEAEA none repeat scroll 0% 0%;
+            border: 1px solid #E5C3C4;
+            color: #C00;
+        }
+
+        .reg-right {
+            position: absolute;
+            right: -30px;
+            top: 20px;
+        }
+    </style>
+
+</head>
+<body>
+
+{% include 'head.html' %}
+<div class="container hidden-xs" style="width: 750px; margin-top: 50px">
+    <ul class="nav nav-tabs nav-justified">
+        <li role="presentation" class="active"><a href="#home" style="color: black;" id="home_page" aria-controls="home"
+                                                  role="tab"
+                >第一步
+            创建账户>></a></li>
+        <li role="presentation"><a href="#profile" id="profile_page" style="color: #969696;" aria-controls="profile"
+                                   role="tab"
+                >第二步
+            完善信息>></a>
+        </li>
+        <li role="presentation"><a href="#messages" id="messages_page" style="color: #969696;" aria-controls="messages"
+                                   role="tab"
+                >第三步
+            注册完成</a>
+        </li>
+    </ul>
+</div>
+
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane fade in active" id="home">
+        <div class="container reg-head hidden-xs">
+            <hr/>
+            <p class="register-font">用户注册</p>
+        </div>
+
+        <div class="container reg-box">
+            <form class="form-horizontal" action="javascript:check_validation()" id="check_validation">
+                <div class="visible-xs">
+                    <p>注册</p>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="用户名（手机号）" id="phone_number"
+                           errortips="手机号已存在">
+                    <!-- <span class="reg-tips-err">邮箱格式不正确</span> -->
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" placeholder="密码（6-16位）" id="password"
+                           errortips="密码长度不符">
+                    <!-- <span class="reg-tips-err">邮箱格式不正确</span> -->
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" placeholder="确认密码" id="repass" errortips="密码不同">
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-9" style="padding-left: 0px; position: static;">
+                        <input type="text" id="verify_code" class="form-control" errortips="验证码不能为空"
+                               placeholder="手机验证码">
+                    </div>
+                    <div class="col-sm-3" style="padding-left: 0px">
+                        <a class="btn btn-default" href="javascript:send_msg();" style="height:40px;padding-top:10px">获取验证码</a>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" id="is_agree" checked="checked"> 我同意
+                        </label>
+                        <a href="javascript:void(0)" data-toggle="modal" data-target="#myModal">用户协议</a>
+                        <a href="/login/" class="pull-right">已有账号？点击登录</a>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success btn-block disabled" role="button">注册</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">用户协议</h4>
+                    </div>
+                    <div class="modal-body">
+                        当您申请用户时，表示您已经同意遵守本规章。
+                        <br>
+                        欢迎您加入本站点参与交流和讨论，为维护网上公共秩序和社会稳定，请您自觉遵守以下条款：
+                        <br>
+                        <br>
+                        一、不得利用本站危害国家安全、泄露国家秘密，不得侵犯国家社会集体的和公民的合法权益，不得利用本站制作、复制和传播下列信息：
+                        <br>
+                        　（一）煽动抗拒、破坏宪法和法律、行政法规实施的；
+                        <br>
+                        　（二）煽动颠覆国家政权，推翻社会主义制度的；
+                        <br>
+                        　（三）煽动分裂国家、破坏国家统一的；
+                        <br>
+                        　（四）煽动民族仇恨、民族歧视，破坏民族团结的；
+                        <br>
+                        　（五）捏造或者歪曲事实，散布谣言，扰乱社会秩序的；
+                        <br>
+                        　（六）宣扬封建迷信、淫秽、色情、赌博、暴力、凶杀、恐怖、教唆犯罪的；
+                        <br>
+                        　（七）公然侮辱他人或者捏造事实诽谤他人的，或者进行其他恶意攻击的；
+                        <br>
+                        　（八）损害国家机关信誉的；
+                        <br>
+                        　（九）其他违反宪法和法律行政法规的；
+                        <br>
+                        　（十）进行商业广告行为的。
+                        <br>
+                        <br>
+                        二、互相尊重，对自己的言论和行为负责。
+                        <br>
+                        三、禁止在申请用户时使用相关本站的词汇，或是带有侮辱、毁谤、造谣类的或是有其含义的各种语言进行注册用户，否则我们会将其删除。
+                        <br>
+                        四、禁止以任何方式对本站进行各种破坏行为。
+                        <br>
+                        五、如果您有违反国家相关法律法规的行为，本站概不负责，您的登录信息均被记录无疑，必要时，我们会向相关的国家管理部门提供此类信息。
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div role="tabpanel" class="tab-pane fade" id="profile">
+        <div class="container reg-head hidden-xs">
+            <hr/>
+            <p class="register-font">完善信息</p>
+        </div>
+
+        <div class="container reg-box">
+            <form class="form" id="register_form" action="javascript:register_ajax()" method="post"
+                  target="_blank">
+                <div class="visible-xs">
+                    <p>完善</p>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="name" class="form-control" placeholder="真实姓名">
+                    <span style="color:red">*</span>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="school" class="form-control" placeholder="学校">
+                    <span style="color:red">*</span>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="major" class="form-control" placeholder="专业">
+                    <span style="color:red">*</span>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="address" class="form-control" placeholder="常用地址">
+                    <span style="color:red">*</span>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="email" class="form-control" placeholder="邮箱" lasted="lasted">
+                    <span style="color:red">*</span>
+                </div>
+                <div id="register_warn" class="form-group alert alert-danger hide">当前表单不能有空项</div>
+                <div class="form-group">
+                    <button id="sub-btn" type="submit" class="btn btn-success btn-block" role="button">完成</button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+    <div role="tabpanel" class="tab-pane fade" id="messages">
+        <div class="container reg-box">
+            <div class="visible-xs">
+                <p>完成</p>
+            </div>
+        </div>
+
+        <div class="container suc-box">
+            <h1>恭喜您，注册成功！</h1>
+            <a href="/submit/">我要去提交 >></a><br/>
+            <a href="#">查看比赛排名 >></a>
+            <a href="/">返回首页 >></a>
+        </div>
+    </div>
+
+</div>
+
+
+<script src="{% static 'bug_vote/js/jquery.min.js' %}"></script>
+<script src="{% static 'bug_vote/js/bootstrap.min.js' %}"></script>
+
+<script src="{% static  'bug_vote/js/csrf_ajax.js' %}"></script>
+<script>
+
+    var ok_send_msg = false;
+
+    $(document).ready(function () {
+
+
+        verify_register_form('#check_validation');
+
+        function verify_register_form(element) {
+            var ok1 = false;
+            var ok2 = false;
+            var ok3 = false;
+            var ok4 = false;
+            var ok5 = true;
+            var button = $(element).find('[role=button]');
+
+            $('#is_agree').change(function () {
+                ok5 = $(this).is(":checked");
+                if (ok1 & ok2 && ok3 && ok4 && ok5 && ok_send_msg) {
+                    $(element).find('[role=button]').removeClass('disabled');
+                }
+                else {
+                    $(element).find('[role=button]').addClass('disabled');
+                }
+            });
+
+
+            $(element).find('[type=text],[type=password]').on({
+                blur: function () {
+                    var _this = $(this);
+                    switch (_this.attr('id')) {
+                        case 'phone_number' :
+                            $.post('/api/check_phone/',
+                                    {
+                                        phone_number: _this.val()
+                                    }, function (result) {
+                                        if (!result.is_success) {
+                                            _this.parent().append('<span class="reg-tips-err">' + _this.attr('errortips') + '</span>');
+                                            if (!button.hasClass('disabled')) {
+                                                button.addClass('disabled');
+                                            }
+                                            ok1 = false;
+                                        }
+                                        else {
+                                            _this.parent().find('.reg-tips-err').detach();
+                                            _this.parent().append('<span class="reg-right glyphicon glyphicon-ok" aria-hidden="true"></span>');
+                                            if (button.hasClass('disabled') && ok2 && ok3 && ok4 && ok5) {
+                                                button.remove('disabled');
+                                            }
+                                            ok1 = true;
+                                        }
+                                    }, 'json'
+                            );
+
+                            break;
+
+                        case 'password' :
+                            if (_this.val().length >= 0 && _this.val().length < 6) {
+                                _this.parent().append('<span class="reg-tips-err">' + _this.attr('errortips') + '</span>');
+                                ok2 = false;
+                            }
+                            else if (_this.val().length > 16) {
+                                _this.parent().append('<span class="reg-tips-err">' + _this.attr('errortips') + '</span>');
+                                ok2 = false;
+                            }
+                            else {
+                                _this.parent().find('.reg-tips-err').detach();
+                                _this.parent().append('<span class="reg-right glyphicon glyphicon-ok"  aria-hidden="true"></span>');
+                                ok2 = true;
+                            }
+                            break;
+
+
+                        case 'repass' :
+                            if (_this.val() != $('input[id="password"]').val()) {
+                                _this.parent().append('<span class="reg-tips-err">' + _this.attr('errortips') + '</span>');
+                                ok3 = false;
+                                // return;
+                            }
+                            else {
+                                _this.parent().find('.reg-tips-err').detach();
+                                _this.parent().append('<span class="reg-right glyphicon glyphicon-ok"  aria-hidden="true"></span>');
+                                ok3 = true;
+                            }
+                            break;
+
+                        case 'verify_code':
+                            if (_this.val().length == 0) {
+                                _this.parent().append('<span class="reg-tips-err">' + _this.attr('errortips') + '</span>');
+                                ok4 = false;
+                                // return;
+                            }
+                            else {
+                                _this.parent().find('.reg-tips-err').detach();
+                                _this.parent().append('<span class="reg-right glyphicon glyphicon-ok"  aria-hidden="true"></span>');
+                                ok4 = true;
+                            }
+                            break;
+                    }
+                    if (ok2 && ok3 && ok4 && ok5 && ok_send_msg) {
+                        button.removeClass('disabled');
+                    }
+                    else {
+                        button.addClass('disabled');
+                    }
+                }
+            })
+        }
+    });
+
+    function check_validation() {
+        var phone_number = $('#phone_number').val();
+        var password = $('#password').val();
+        var verify_code = $('#verify_code').val();
+        $.post('/api/validate_phone/', {
+            phone_number: phone_number,
+            verify_code: verify_code,
+            password: password
+        }, function (result) {
+            if (result.is_success) {
+                $("#home_page").css("color", "#969696");
+                var profile = $("#profile_page");
+                profile.tab("show");
+                profile.css("color", "black");
+            } else {
+                $('#verify_code').parent().append('<span class="reg-tips-err">验证码错误</span>');
+            }
+        })
+    }
+
+    function register_ajax() {
+        var warn = $('#register_warn');
+
+        warn.addClass('hide');
+
+        var l = document.getElementById('register_form').elements.length;
+        var inputs = $("#register_form").find('[type=text]');
+        for (var i = 0; i < inputs.length; i++) {
+            if (inputs[i].value == "") {
+                warn.removeClass('hide');
+                inputs[i].focus();
+                return;
+            }
+            if (inputs[i].id == "email") {
+                var pattern = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+/;
+                if (!pattern.test(inputs[i].value)) {
+                    warn.removeClass('hide');
+                    warn.text("请输入正确的邮箱地址");
+                    inputs[i].focus();
+                    return;
+                }
+            }
+        }
+
+        var email = $("#email").val();
+        var major = $("#major").val();
+        var address = $("#address").val();
+        var school = $("#school").val();
+        var name = $("#name").val();
+        $('#sub-btn').addClass('disabled');
+        $.post("/api/register/", {
+            email: email,
+            major: major,
+            address: address,
+            school: school,
+            name: name
+        }, function (result) {
+            if (result.is_success) {
+                $("#profile_page").css("color", " #969696");
+                var msg = $("#messages_page");
+                msg.tab("show");
+                msg.css("color", "black")
+            } else {
+                warn.removeClass('hide');
+                warn.text(result.msg);
+                $('#sub-btn').removeClass('disabled');
+            }
+        })
+
+    }
+
+    function send_msg() {
+        var phone_ele = $("#phone_number");
+        var number = phone_ele.val();
+        if (number == "") {
+            phone_ele.focus();
+            return
+        }
+        $.post("/api/send_msg/", {
+            phone_number: number
+        }, function (result) {
+            if (result.is_success) {
+                ok_send_msg = true;
+            }
+        })
+    }
+</script>
+{% include 'footer.html' %}
+</body>
+</html>
+
+
+
+
+
+
+
