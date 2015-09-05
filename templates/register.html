@@ -410,94 +410,115 @@
                 }
             })
         }
+		
+		function check_validation() {
+			var phone_number = $('#phone_number').val();
+			var password = $('#password').val();
+			var verify_code = $('#verify_code').val();
+			$.post('/api/validate_phone/', {
+				phone_number: phone_number,
+				verify_code: verify_code,
+				password: password
+			}, function (result) {
+				if (result.is_success) {
+					$("#home_page").css("color", "#969696");
+					var profile = $("#profile_page");
+					profile.tab("show");
+					profile.css("color", "black");
+				} else {
+					$('#verify_code').parent().append('<span class="reg-tips-err">验证码错误</span>');
+				}
+			})
+		}
+
+		function register_ajax() {
+			var warn = $('#register_warn');
+
+			warn.addClass('hide');
+
+			var l = document.getElementById('register_form').elements.length;
+			var inputs = $("#register_form").find('[type=text]');
+			for (var i = 0; i < inputs.length; i++) {
+				if (inputs[i].value == "") {
+					warn.removeClass('hide');
+					inputs[i].focus();
+					return;
+				}
+				if (inputs[i].id == "email") {
+					var pattern = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+/;
+					if (!pattern.test(inputs[i].value)) {
+						warn.removeClass('hide');
+						warn.text("请输入正确的邮箱地址");
+						inputs[i].focus();
+						return;
+					}
+				}
+			}
+
+			var email = $("#email").val();
+			var major = $("#major").val();
+			var address = $("#address").val();
+			var school = $("#school").val();
+			var name = $("#name").val();
+			$('#sub-btn').addClass('disabled');
+			$.post("/api/register/", {
+				email: email,
+				major: major,
+				address: address,
+				school: school,
+				name: name
+			}, function (result) {
+				if (result.is_success) {
+					$("#profile_page").css("color", " #969696");
+					var msg = $("#messages_page");
+					msg.tab("show");
+					msg.css("color", "black")
+				} else {
+					warn.removeClass('hide');
+					warn.text(result.msg);
+					$('#sub-btn').removeClass('disabled');
+				}
+			})
+
+		}
+
+		function send_msg() {
+			var phone_ele = $("#phone_number");
+			var number = phone_ele.val();
+			if (number == "") {
+				phone_ele.focus();
+				return
+			}
+			$.post("/api/send_msg/", {
+				phone_number: number
+			}, function (result) {
+				if (result.is_success) {
+					ok_send_msg = true;
+				}
+			})
+		}
+		
+		$('#confirm_btn').on('click', function(event) {
+			event.preventDefault();
+			/* Act on the event */
+			var step = 59;
+			var btn = $('#confirm_btn');
+			btn.attr("disabled", true);//设置disabled属性
+			btn.text('重新发送60');
+			var _res = setInterval(function()
+			{
+			btn.text('重新发送'+step);
+			step -= 1;
+				if(step < 0){
+					btn.removeAttr("disabled"); //移除disabled属性
+					btn.text('获取验证码');
+					clearInterval(_res);//清除setInterval
+				}
+			},1000);
+		});	
     });
 
-    function check_validation() {
-        var phone_number = $('#phone_number').val();
-        var password = $('#password').val();
-        var verify_code = $('#verify_code').val();
-        $.post('/api/validate_phone/', {
-            phone_number: phone_number,
-            verify_code: verify_code,
-            password: password
-        }, function (result) {
-            if (result.is_success) {
-                $("#home_page").css("color", "#969696");
-                var profile = $("#profile_page");
-                profile.tab("show");
-                profile.css("color", "black");
-            } else {
-                $('#verify_code').parent().append('<span class="reg-tips-err">验证码错误</span>');
-            }
-        })
-    }
 
-    function register_ajax() {
-        var warn = $('#register_warn');
-
-        warn.addClass('hide');
-
-        var l = document.getElementById('register_form').elements.length;
-        var inputs = $("#register_form").find('[type=text]');
-        for (var i = 0; i < inputs.length; i++) {
-            if (inputs[i].value == "") {
-                warn.removeClass('hide');
-                inputs[i].focus();
-                return;
-            }
-            if (inputs[i].id == "email") {
-                var pattern = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+/;
-                if (!pattern.test(inputs[i].value)) {
-                    warn.removeClass('hide');
-                    warn.text("请输入正确的邮箱地址");
-                    inputs[i].focus();
-                    return;
-                }
-            }
-        }
-
-        var email = $("#email").val();
-        var major = $("#major").val();
-        var address = $("#address").val();
-        var school = $("#school").val();
-        var name = $("#name").val();
-        $('#sub-btn').addClass('disabled');
-        $.post("/api/register/", {
-            email: email,
-            major: major,
-            address: address,
-            school: school,
-            name: name
-        }, function (result) {
-            if (result.is_success) {
-                $("#profile_page").css("color", " #969696");
-                var msg = $("#messages_page");
-                msg.tab("show");
-                msg.css("color", "black")
-            } else {
-                warn.removeClass('hide');
-                warn.text(result.msg);
-                $('#sub-btn').removeClass('disabled');
-            }
-        })
-
-    }
-
-    function send_msg() {
-        var phone_ele = $("#phone_number");
-        var number = phone_ele.val();
-        if (number == "") {
-            phone_ele.focus();
-            return
-        }
-        $.post("/api/send_msg/", {
-            phone_number: number
-        }, function (result) {
-            if (result.is_success) {
-                ok_send_msg = true;
-            }
-        })
-    }
 </script>
 {% include 'footer.html' %}
 </body>
